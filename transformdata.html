@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache"> 
+<meta http-equiv="expires" content="0"> 
+<meta http-equiv="pragma" content="no-cache">
+<script src="http://d3js.org/d3.v4.min.js"></script>
+
+
+<body>
+<script>
+d3.csv("Posts 6-6 6-13.csv",transform, function (error, data) {
+
+
+
+  // FORMATTING DATA //
+
+  if (error) {
+    alert("Try refreshing your browser.");
+    return;
+  }
+  var currentTime = d3.max(data, function(d) { return d.date} )
+
+  nesteddata = d3.nest().key(function(d){return d.QuestionId}).sortValues(function(a,b) { return a.date > b.date }).rollup(function(posts)
+  {
+posts = posts.reverse()
+question = posts[0]
+FirstAnswerDate = currentTime
+AcceptedAnswerDate = currentTime
+answers = posts.slice(1)
+tags = question.Tags.split("\n").concat("All")
+tags.append
+answers.forEach(
+function(answer){
+  if(answer.Id == question.AcceptedAnswerId){
+    answer.isAccepted = true
+    AcceptedAnswerDate = answer.date
+  }
+  FirstAnswerDate = d3.min([FirstAnswerDate,answer.date])
+
+  return answer
+}
+
+  )
+
+if (question.PostTypeId == "1" && question.AnswerCount > 0 && FirstAnswerDate > question.date){
+  for (tag in tags){
+return tags.map(function(tag){return{
+Id: question.Id,
+Tag: tag,
+Title: question.Title,
+Accepted: question.AcceptedAnswerId,
+"Duration to First Answer": FirstAnswerDate - question.date,
+"Duration to Accepted Answer": AcceptedAnswerDate - question.date,
+}}
+)
+}
+}
+
+  }).entries(data)
+
+result = nesteddata.map(function (d){
+   if(d.value){
+      return d.value
+   }
+  }).filter(function(d){return d}).reduce(function(a, b) {
+  return a.concat(b);
+}, []);
+
+
+
+var dataStr = JSON.stringify(result)
+var blob = new Blob([dataStr], {type: "application/json"});
+var url  = URL.createObjectURL(blob);
+
+        link = document.createElement('a');
+        link.setAttribute('href',  url);
+        link.setAttribute('download', "myfile.json");
+        link.click();
+    
+})
+
+function transform(d) {
+  d.date = new Date(d.CreationDate);
+  if (d.PostTypeId == "2"){
+    d.QuestionId = d.ParentId
+  }
+  else {
+    d.QuestionId = d.Id
+  }
+  return d;
+}
+
+
+
+</script>
+</body>
