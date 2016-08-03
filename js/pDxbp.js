@@ -135,7 +135,7 @@ for (var i = 0; i < arrayLength; i++) {
 Tag = Tags[i]
             var opt = document.createElement('option');
             opt.value = Tag.key
-            opt.innerHTML = Tag.key + ": " + Tag.values
+            opt.innerHTML = Tag.key + " (" + Tag.values +")"
             if (Tag.key == "python" || Tag.key == "java"){
                opt.selected = "selected";
             }
@@ -264,7 +264,6 @@ var filtereddata =  filterdata()
          var filtereddata =  filterdata()
          boxPlotFunctions.xbp.data(filtereddata );
          boxPlotFunctions.xbp.update();      
-         boxPlotFunctions.xbp.update();
       });
 
       var row14 = viztable.append('tr').append('td').attr('align', 'left');
