@@ -1,9 +1,12 @@
 <!DOCTYPE html>
+   <head>
+
 <meta charset="utf-8">
       <script src="http://d3js.org/d3.v3.js"></script>
 
 <link href="css/c3.css" rel="stylesheet" type="text/css">
       <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+      <title>How Likely will Questions be Answered?</title>
 
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 
@@ -12,8 +15,8 @@
 <link rel="stylesheet" href="css/bootstrap-multiselect.css" type="text/css"/>
 <!-- Load d3.js and c3.js -->
 <script src="js/c3.js"></script>
+</head>
 <body>
-<div id="chartAnswered"></div>
 <script>
 var chart
 var keys = ["< 1 min","< 5 mins","< 30 mins","< 1 hour","< 3 hours","< 1 day","< 3 days","< 1 week"]
@@ -170,7 +173,7 @@ chart.load({
 
 var chartData = buildData(data)
 chart = c3.generate({
-  bindto:'#chart1',
+  bindto:'#chartAnswered',
     data: {
         columns: chartData,
         type: 'area-spline',
@@ -228,9 +231,9 @@ function setupControls(){
 
 </script>
       <div id="container" class="container-fluid text-center">
-         <h5 id='title' style="color: #3B3B3B;">Answer Activity Drops off over time</h5>
+         <h5 id='title' style="color: #3B3B3B;">Likelihood of Answer by Question Age</h5>
          <div class="col-sm-9">
-            <div id="chart1"></div>
+<div id="chartAnswered"></div>
          </div>
 
          <div class="col-sm-3">
