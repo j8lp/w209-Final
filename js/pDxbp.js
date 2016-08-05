@@ -117,7 +117,7 @@ millisecondsToStr(quartiles[2]) +  '</span><br><span style="color:' + color +
 '">Median</span></span><span style="color:#DDDDDD;" > : ' + 
 millisecondsToStr(quartiles[1]) +  '</span><br><span style="color:' + color + 
 '">1st Quartile</span></span><span style="color:#DDDDDD;" > : ' 
-                         + millisecondsToStr(quartiles[0]) + '</span>';
+                         + millisecondsToStr(quartiles[0]) + '</span><br> (click to expand)';
           return message;
        }
        events.box.mouseover = tipBox.show;

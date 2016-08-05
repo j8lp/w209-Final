@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+      <script src="http://d3js.org/d3.v3.js"></script>
+
+<link href="css/c3.css" rel="stylesheet" type="text/css">
+      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+      <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
+      <script type="text/javascript" src="js/bootstrap-multiselect.js"></script>
+<link rel="stylesheet" href="css/bootstrap-multiselect.css" type="text/css"/>
+<!-- Load d3.js and c3.js -->
+<script src="js/c3.js"></script>
+<body>
+<div id="chartAnswered"></div>
+<script>
+var chart
+var keys = ["< 1 min","< 5 mins","< 30 mins","< 1 hour","< 3 hours","< 1 day","< 3 days","< 1 week"]
+
+function tooltipFunction(d, defaultTitleFormat, defaultValueFormat, color) {
+        if (document.getElementById("showVal").checked) {
+            // Use default rendering
+            r  = this.getTooltipContent(d, defaultTitleFormat, defaultValueFormat, color);
+            return r
+        } else {
+        	index = d[0].index
+        	sums = (chart.data()).map(
+function(count){
+	values = count.values.slice(index).map(function(d){return d.value	})
+return values.reduce(function (a,b){return a +b},0)
+})
+        		pr0 = Math.round(sums[0] / (sums[0] + sums[2]) * 1000)/10
+
+        		pr1 = Math.round(sums[1] / (sums[1] + sums[2]) * 1000)/10
+        	var table = document.createElement("table")
+        	table.className = 'c3-tooltip'
+			var th = table.appendChild( document.createElement('tr')).appendChild( document.createElement('th'))
+			th.setAttribute("colspan" , '2')
+			th.innerHTML ="Probability of Question Getting Answer"
+			var row1 = table.appendChild(document.createElement('tr'))
+			var td =row1.appendChild(document.createElement("td"))
+			td.className = "name"
+			td.innerHTML = "Question Age &lt;" + keys[index].slice(1)
+			td=row1.appendChild(document.createElement("td"))
+			td.className = "value"
+			if(pr0 == pr1){
+				td.innerHTML = pr0 + "%"
+			} else{
+				td.innerHTML = pr0 + "% to " + pr1 + "%"
+			}
+            return table.outerHTML
+        }
+    }
+
+
+function kvToArray(d){
+  dKeys = d.map(function(d1){return d1.key})
+  cols = keys.map(function(key){
+    var i = dKeys.indexOf(key)
+    if (i > -1){
+      return d[i].values
+    }
+  return 0
+  })
+  return  cols
+
+}
+function getSelectedTags() {
+    var select1 = document.getElementById("TagsSelect");
+    var selected1 = [];
+    for (var i = 0; i < select1.length; i++) {
+        if (select1.options[i].selected) selected1.push(select1.options[i].value);
+    }
+    return selected1}
+
+function buildData(data){
+
+var Tags = getSelectedTags()
+filtereddata = data
+if (Tags.indexOf("All") == -1){
+filtereddata = data.filter(function(d){
+
+for (i in Tags){
+	var Tag = Tags[i]
+if (d.Tags.split(" ").indexOf(Tag)>-1){
+	return true
+}
+}
+return false
+})
+}
+	earliest =   d3.nest().key(function (d){
+
+  if (d.postcount > 1){
+    return "Question Age at First Answer"
+  }
+  return "Unanswered Question Age"
+}).key(function (d){
+  return d.RangeFirst.trim()
+}).rollup(function(d){
+  return d.length
+}).sortKeys(d3.ascending).entries(filtereddata)
+
+latest =   filtereddata.filter(function(d){return d.postcount > 1})
+latest = 
+	d3.nest().key(function (d){
+  return d.RangeLast.trim()
+}).rollup(function(d){
+  return d.length
+}).sortKeys(d3.ascending).entries(latest)
+var chartData = [["x"].concat(keys)]
+chartData = chartData.concat(earliest.map(function(d) {
+	return [d.key].concat(kvToArray(d.values))
+}))
+ chartData.splice(2,0,["Question Age at Last Answer"].concat(kvToArray(latest)))
+return chartData 
+}
+
+
+ function populateTagsSelect(Tags){
+
+        select = document.getElementById("TagsSelect");
+              var opt = document.createElement('option');
+            opt.value = "All"
+            opt.innerHTML = "ALL"
+               opt.selected = "selected";
+                          select.appendChild(opt);
+var arrayLength = Tags.length
+for (var i = 0; i < arrayLength; i++) {
+var Tag = Tags[i]
+            var opt = document.createElement('option');
+            opt.value = Tag.key
+            opt.innerHTML = Tag.key + ": " + Tag.values
+           select.appendChild(opt);
+        
+    }
+}
+
+
+d3.json("AnsweredRanges.json", function(error, data) {
+    if (error) throw error;
+
+
+setupControls()
+  var  Tags = data.map(function(d){return d.Tags.split(" ")}).reduce(function(a, b) {
+  return a.concat(b);
+}, []);
+     Tags = d3.nest()
+         .key(function(d) {
+          return d
+      })
+         .rollup(function(d){return d.length})
+         .entries(Tags).filter(function(d){
+return d.values > 10
+          }).sort(
+          function(a,b) {
+          return b.values-a.values; })
+populateTagsSelect(Tags)
+$('#TagsSelect').multiselect({
+              maxHeight: 400,
+            enableCaseInsensitiveFiltering: true,
+  onChange:function() { 
+  var filtereddata = buildData(data )
+chart.load({
+	columns: filtereddata
+})
+         
+      }})
+
+var chartData = buildData(data)
+chart = c3.generate({
+  bindto:'#chart1',
+    data: {
+        columns: chartData,
+        type: 'area-spline',
+        x: 'x',
+            colors: {
+            "Question Age at Last Answer": '#B2DF8A',
+            "Question Age at First Answer": '#A6CFED',
+            "Unanswered Question Age":'#FF7F00'
+        },
+    },
+      axis: {
+        x: {
+            type: 'category' // this needed to load string x value
+        }
+    },
+    tooltip: {
+    contents: tooltipFunction
+}
+
+});
+
+function setupControls(){
+
+      var original_sample_size = 200
+      var original_height;
+
+      var vizcontrol = d3.select('#controls');
+      var viztable = vizcontrol.append('table').attr('align', 'center');
+
+
+      var row3 = viztable.append('tr').append('td').append('hr');
+
+      var row10 = viztable.append('tr').append('td').attr('align', 'left');
+      row10.append('label').html('&nbsp; Tags').style('font-size', '12px');
+
+
+      var row11 = viztable.append('tr').append('td').attr('align', 'left');
+      row11.append('select').attr('name', 'Tags').attr('id', 'TagsSelect')
+
+      var row12 = viztable.append('tr').append('td').append('hr');
+
+      var row13 = viztable.append('tr').append('td').attr('align', 'left');
+      row13.append('input').attr('name', 'attribute').attr('id', 'showPerc').attr('type', 'radio').attr('value', 'showPerc').attr('checked', 'checked');
+      row13.append('label').html('&nbsp; Show Probability of Question Getting Answer').style('font-size', '12px');
+
+
+      var row14 = viztable.append('tr').append('td').attr('align', 'left');
+      row14.append('input').attr('name', 'attribute').attr('id', 'showVal').attr('type', 'radio').attr('value', 'showVal')
+      row14.append('label').html('&nbsp; Show Raw Counts').style('font-size', '12px');
+
+}
+
+})
+
+
+</script>
+      <div id="container" class="container-fluid text-center">
+         <h5 id='title' style="color: #3B3B3B;">Answer Activity Drops off over time</h5>
+         <div class="col-sm-9">
+            <div id="chart1"></div>
+         </div>
+
+         <div class="col-sm-3">
+            <div id="controls">
+            </div>
+         </div>
+      </div>
+</body>
