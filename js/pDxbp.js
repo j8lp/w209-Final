@@ -134,9 +134,9 @@ var arrayLength = Tags.length
 for (var i = 0; i < arrayLength; i++) {
 Tag = Tags[i]
             var opt = document.createElement('option');
-            opt.value = Tag.key
-            opt.innerHTML = Tag.key + " (" + Tag.values +")"
-            if (Tag.key == "python" || Tag.key == "java"){
+            opt.value = Tag.Name
+            opt.innerHTML = Tag.Name + " (" + Tag.Count +")"
+            if (Tag.Name == "python" || Tag.Name == "java"){
                opt.selected = "selected";
             }
            select.appendChild(opt);
@@ -188,6 +188,19 @@ return 1
    boxPlotFunctions.defaultDistribution = defaultDistribution;
 
    function defaultDistribution(tooltip) {
+    d3.csv("TagCounts.csv",function(error,Tags){
+        if (error) throw error;
+        populateTagsSelect(Tags)
+$('#TagsSelect').multiselect({
+              maxHeight: 400,
+            enableCaseInsensitiveFiltering: true,
+  onChange:function() { 
+  var filtereddata = filterdata(data )
+            boxPlotFunctions.xbp.data(filtereddata);
+            boxPlotFunctions.xbp.update();
+         
+      }}
+      )
       var default_distributions = 'PostDurations.json';
       var container = d3.select('#pointDistributions');
 
@@ -198,25 +211,9 @@ return 1
                   var xbp = explodingBoxplot();
          boxPlotFunctions.xbp = xbp;
 
-         Tags = d3.nest()
-         .key(function(d) { return d.Tag; })
-         .rollup(function(d){return d.length})
-         .entries(result).filter(function(d){
-return d.values > 10
-          }).sort(
-          function(a,b) {
-          return b.values-a.values; })
+
          data = d3.shuffle(result)
-         populateTagsSelect(Tags)
-$('#TagsSelect').multiselect({
-              maxHeight: 400,
-            enableCaseInsensitiveFiltering: true,
-  onChange:function() { 
-  var filtereddata = filterdata(data )
-            boxPlotFunctions.xbp.data(filtereddata);
-            boxPlotFunctions.xbp.update();
-         
-      }})
+
 
          if (tooltip) {
             if (tooltip == 'popover') xbp.events({ 'point': { 'mouseover': showTooltip, 'mouseout': removeTooltip } });
@@ -246,7 +243,9 @@ var filtereddata =  filterdata()
          xbp.update();
 
       });
-   }
+   
+   });
+  }
 
    boxPlotFunctions.demoSetup = demoSetup;
    function demoSetup() {

@@ -33,9 +33,9 @@ function(count){
 	values = count.values.slice(index).map(function(d){return d.value	})
 return values.reduce(function (a,b){return a +b},0)
 })
-        		pr0 = Math.round(sums[0] / (sums[0] + sums[2]) * 1000)/10
+        	var	pr0 = Math.round(sums[0] / (sums[0] + sums[2]) * 1000)/10
 
-        		pr1 = Math.round(sums[1] / (sums[1] + sums[2]) * 1000)/10
+        	var	pr1 = Math.round(sums[1] / (sums[1] + sums[2]) * 1000)/10
         	var table = document.createElement("table")
         	table.className = 'c3-tooltip'
 			var th = table.appendChild( document.createElement('tr')).appendChild( document.createElement('th'))
@@ -58,8 +58,8 @@ return values.reduce(function (a,b){return a +b},0)
 
 
 function kvToArray(d){
-  dKeys = d.map(function(d1){return d1.key})
-  cols = keys.map(function(key){
+ var dKeys = d.map(function(d1){return d1.key})
+  var cols = keys.map(function(key){
     var i = dKeys.indexOf(key)
     if (i > -1){
       return d[i].values
@@ -80,7 +80,7 @@ function getSelectedTags() {
 function buildData(data){
 
 var Tags = getSelectedTags()
-filtereddata = data
+var filtereddata = data
 if (Tags.indexOf("All") == -1){
 filtereddata = data.filter(function(d){
 
@@ -93,7 +93,7 @@ if (d.Tags.split(" ").indexOf(Tag)>-1){
 return false
 })
 }
-	earliest =   d3.nest().key(function (d){
+	var earliest =   d3.nest().key(function (d){
 
   if (d.postcount > 1){
     return "Question Age at First Answer"
@@ -105,15 +105,15 @@ return false
   return d.length
 }).sortKeys(d3.ascending).entries(filtereddata)
 
-latest =   filtereddata.filter(function(d){return d.postcount > 1})
-latest = 
+var latest =   filtereddata.filter(function(d){return d.postcount > 1})
+var latest = 
 	d3.nest().key(function (d){
   return d.RangeLast.trim()
 }).rollup(function(d){
   return d.length
 }).sortKeys(d3.ascending).entries(latest)
 var chartData = [["x"].concat(keys)]
-chartData = chartData.concat(earliest.map(function(d) {
+var chartData = chartData.concat(earliest.map(function(d) {
 	return [d.key].concat(kvToArray(d.values))
 }))
  chartData.splice(2,0,["Question Age at Last Answer"].concat(kvToArray(latest)))
@@ -121,79 +121,68 @@ return chartData
 }
 
 
- function populateTagsSelect(Tags){
-
-        select = document.getElementById("TagsSelect");
-              var opt = document.createElement('option');
-            opt.value = "All"
-            opt.innerHTML = "ALL"
-               opt.selected = "selected";
-                          select.appendChild(opt);
-var arrayLength = Tags.length
-for (var i = 0; i < arrayLength; i++) {
-var Tag = Tags[i]
+function populateTagsSelect(Tags){
+		var select = document.getElementById("TagsSelect");
+		var arrayLength = Tags.length
+		for (var i = 0; i < arrayLength; i++) {
+			var Tag = Tags[i]
             var opt = document.createElement('option');
-            opt.value = Tag.key
-            opt.innerHTML = Tag.key + ": " + Tag.values
-           select.appendChild(opt);
+            opt.value = Tag.Name
+            opt.innerHTML = Tag.Name + " (" + Tag.Count +")"
+            if (Tag.Name == "All"){
+               opt.selected = "selected";
+            }
+           	select.appendChild(opt);
         
     }
 }
 
+d3.csv("TagCounts.csv",function(error,Tags){
+    if (error) throw error;
+setupControls()
+populateTagsSelect(Tags)
 
 d3.json("AnsweredRanges.json", function(error, data) {
     if (error) throw error;
-
-
-setupControls()
-  var  Tags = data.map(function(d){return d.Tags.split(" ")}).reduce(function(a, b) {
-  return a.concat(b);
-}, []);
-     Tags = d3.nest()
-         .key(function(d) {
-          return d
-      })
-         .rollup(function(d){return d.length})
-         .entries(Tags).filter(function(d){
-return d.values > 10
-          }).sort(
-          function(a,b) {
-          return b.values-a.values; })
-populateTagsSelect(Tags)
-$('#TagsSelect').multiselect({
+	$('#TagsSelect').multiselect({
               maxHeight: 400,
             enableCaseInsensitiveFiltering: true,
-  onChange:function() { 
-  var filtereddata = buildData(data )
-chart.load({
-	columns: filtereddata
-})
-         
-      }})
+  			onChange:function() { 
+  				var filtereddata = buildData(data )
+				chart.load({
+				columns: filtereddata
+			})
+         }})
 
-var chartData = buildData(data)
-chart = c3.generate({
-  bindto:'#chartAnswered',
-    data: {
-        columns: chartData,
-        type: 'area-spline',
-        x: 'x',
+	var chartData = buildData(data)
+	chart = c3.generate({
+  		bindto:'#chartAnswered',
+    	data: {
+        	columns: chartData,
+       		type: 'area-spline',
+      	 	x: 'x',
             colors: {
-            "Question Age at Last Answer": '#B2DF8A',
-            "Question Age at First Answer": '#A6CFED',
-            "Unanswered Question Age":'#FF7F00'
-        },
-    },
-      axis: {
-        x: {
-            type: 'category' // this needed to load string x value
-        }
-    },
-    tooltip: {
-    contents: tooltipFunction
-}
+            	"Question Age at Last Answer": '#B2DF8A',
+            	"Question Age at First Answer": '#A6CFED',
+          	  "Unanswered Question Age":'#FF7F00'
+  		      },
+ 		   },
 
-});
+ 	     axis: {
+  	     x: {
+            type: 'category' // this needed to load string x value
+       	 },
+       	 y: {
+       	 	label: "Count"
+       	 }
+  		  },
+
+  	  tooltip: {
+  	  contents: tooltipFunction
+		}
+
+})
+})
 
 function setupControls(){
 
