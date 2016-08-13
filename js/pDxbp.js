@@ -192,6 +192,8 @@ return 1
         if (error) throw error;
         populateTagsSelect(Tags)
 $('#TagsSelect').multiselect({
+  includeSelectAllOption: true,
+  selectAllText: "Clear All",
               maxHeight: 400,
             enableCaseInsensitiveFiltering: true,
   onChange:function() { 
@@ -199,7 +201,12 @@ $('#TagsSelect').multiselect({
             boxPlotFunctions.xbp.data(filtereddata);
             boxPlotFunctions.xbp.update();
          
-      }}
+      },
+ onSelectAll: function() {
+$('#TagsSelect').multiselect("deselectAll",true)
+        }
+
+    }
       )
       var default_distributions = 'PostDurations.json';
       var container = d3.select('#pointDistributions');
