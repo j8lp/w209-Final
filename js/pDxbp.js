@@ -86,7 +86,7 @@ function millisecondsToStr (milliseconds) {
        }
 
   function openWindowFunction(d) {
-	var win = window.open('http://stackoverflow.com/questions/'+d.Id, '_blank');
+  var win = window.open('http://stackoverflow.com/questions/'+d.Id, '_blank');
 if (win) {
     //Browser has allowed it to be opened
     win.focus();
@@ -117,7 +117,7 @@ millisecondsToStr(quartiles[2]) +  '</span><br><span style="color:' + color +
 '">Median</span></span><span style="color:#DDDDDD;" > : ' + 
 millisecondsToStr(quartiles[1]) +  '</span><br><span style="color:' + color + 
 '">1st Quartile</span></span><span style="color:#DDDDDD;" > : ' 
-                         + millisecondsToStr(quartiles[0]) + '</span><br> (click to expand)';
+                         + millisecondsToStr(quartiles[0]) + '</span><br> (click to see individual points)';
           return message;
        }
        events.box.mouseover = tipBox.show;
@@ -318,7 +318,6 @@ var filtereddata =  filterdata()
          boxPlotFunctions.xbp.data(filtereddata );
          boxPlotFunctions.xbp.update();      });
 
-//      var row6 = viztable.append('tr').append('td').append('hr');
 
      var row7 = viztable.append('tr').append('td').attr('align', 'left');
       row7.append('label').html('&nbsp; Sample Size').style('font-size', '12px');
@@ -331,10 +330,12 @@ var filtereddata =  filterdata()
          boxPlotFunctions.xbp.data(filtereddata );
          boxPlotFunctions.xbp.update();
       });
+      var row6 = viztable.append('tr').append('td')
+      row6.attr('align', 'left').html('(High sample sizes may reduce performance)').style('font-size', '10px');
 
       var row12 = viztable.append('tr').append('td').append('hr');
-      var row13 = viztable.append('tr').append('td').attr('align', 'left')
-                          .html('Explode: click on boxes<br/>Reset: double-click background');
+      var row13 = viztable.append('tr').append("div").attr("id","rcorners").append('td').attr('align', 'left')
+                          .html('Expand: click on boxes<br/>Reset: double-click background');
 
    }
 

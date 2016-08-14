@@ -27,31 +27,35 @@ function tooltipFunction(d, defaultTitleFormat, defaultValueFormat, color) {
             r  = this.getTooltipContent(d, defaultTitleFormat, defaultValueFormat, color);
             return r
         } else {
-        	index = d[0].index
-        	sums = (chart.data()).map(
+          index = d[0].index
+          sums = (chart.data()).map(
 function(count){
-	values = count.values.slice(index).map(function(d){return d.value	})
+  values = count.values.slice(index).map(function(d){return d.value })
 return values.reduce(function (a,b){return a +b},0)
 })
-        	var	pr0 = Math.round(sums[0] / (sums[0] + sums[2]) * 1000)/10
+          var pr0 = Math.round(sums[0] / (sums[0] + sums[2]) * 1000)/10
 
-        	var	pr1 = Math.round(sums[1] / (sums[1] + sums[2]) * 1000)/10
-        	var table = document.createElement("table")
-        	table.className = 'c3-tooltip'
-			var th = table.appendChild( document.createElement('tr')).appendChild( document.createElement('th'))
-			th.setAttribute("colspan" , '2')
-			th.innerHTML ="Probability of Question Getting Answer"
-			var row1 = table.appendChild(document.createElement('tr'))
-			var td =row1.appendChild(document.createElement("td"))
-			td.className = "name"
-			td.innerHTML = "Question Age &lt;" + keys[index].slice(1)
-			td=row1.appendChild(document.createElement("td"))
-			td.className = "value"
-			if(pr0 == pr1){
-				td.innerHTML = pr0 + "%"
-			} else{
-				td.innerHTML = pr0 + "% to " + pr1 + "%"
-			}
+          var pr1 = Math.round(sums[1] / (sums[1] + sums[2]) * 1000)/10
+          var table = document.createElement("table")
+          table.className = 'c3-tooltip'
+      var th = table.appendChild( document.createElement('tr')).appendChild( document.createElement('th'))
+      th.setAttribute("colspan" , '2')
+      th.innerHTML ="Percentage of Questions Answered"
+      var row1 = table.appendChild(document.createElement('tr'))
+      var td =row1.appendChild(document.createElement("td"))
+      td.className = "name"
+      if (index == 0) { var gtLabel = "All Questions"} else{
+              var gtLabel =  "Question Age >" + keys[index-1].slice(1)
+
+      }
+      td.innerHTML = gtLabel
+      td=row1.appendChild(document.createElement("td"))
+      td.className = "value"
+      if(pr0 == pr1){
+        td.innerHTML = pr0 + "%"
+      } else{
+        td.innerHTML = pr0 + "% to " + pr1 + "%"
+      }
             return table.outerHTML
         }
     }
@@ -85,15 +89,15 @@ if (Tags.indexOf("All") == -1){
 filtereddata = data.filter(function(d){
 
 for (i in Tags){
-	var Tag = Tags[i]
+  var Tag = Tags[i]
 if (d.Tags.split(" ").indexOf(Tag)>-1){
-	return true
+  return true
 }
 }
 return false
 })
 }
-	var earliest =   d3.nest().key(function (d){
+  var earliest =   d3.nest().key(function (d){
 
   if (d.postcount > 1){
     return "Question Age at First Answer"
@@ -107,14 +111,14 @@ return false
 
 var latest =   filtereddata.filter(function(d){return d.postcount > 1})
 var latest = 
-	d3.nest().key(function (d){
+  d3.nest().key(function (d){
   return d.RangeLast.trim()
 }).rollup(function(d){
   return d.length
 }).sortKeys(d3.ascending).entries(latest)
 var chartData = [["x"].concat(keys)]
 var chartData = chartData.concat(earliest.map(function(d) {
-	return [d.key].concat(kvToArray(d.values))
+  return [d.key].concat(kvToArray(d.values))
 }))
  chartData.splice(2,0,["Question Age at Last Answer"].concat(kvToArray(latest)))
 return chartData 
@@ -122,17 +126,17 @@ return chartData
 
 
 function populateTagsSelect(Tags){
-		var select = document.getElementById("TagsSelect");
-		var arrayLength = Tags.length
-		for (var i = 0; i < arrayLength; i++) {
-			var Tag = Tags[i]
+    var select = document.getElementById("TagsSelect");
+    var arrayLength = Tags.length
+    for (var i = 0; i < arrayLength; i++) {
+      var Tag = Tags[i]
             var opt = document.createElement('option');
             opt.value = Tag.Name
             opt.innerHTML = Tag.Name + " (" + Tag.Count +")"
             if (Tag.Name == "All"){
                opt.selected = "selected";
             }
-           	select.appendChild(opt);
+            select.appendChild(opt);
         
     }
 }
@@ -144,42 +148,42 @@ populateTagsSelect(Tags)
 
 d3.json("AnsweredRanges.json", function(error, data) {
     if (error) throw error;
-	$('#TagsSelect').multiselect({
+  $('#TagsSelect').multiselect({
               maxHeight: 400,
             enableCaseInsensitiveFiltering: true,
-  			onChange:function() { 
-  				var filtereddata = buildData(data )
-				chart.load({
-				columns: filtereddata
-			})
+        onChange:function() { 
+          var filtereddata = buildData(data )
+        chart.load({
+        columns: filtereddata
+      })
          }})
 
-	var chartData = buildData(data)
-	chart = c3.generate({
-  		bindto:'#chartAnswered',
-    	data: {
-        	columns: chartData,
-       		type: 'area-spline',
-      	 	x: 'x',
+  var chartData = buildData(data)
+  chart = c3.generate({
+      bindto:'#chartAnswered',
+      data: {
+          columns: chartData,
+          type: 'area-spline',
+          x: 'x',
             colors: {
-            	"Question Age at Last Answer": '#B2DF8A',
-            	"Question Age at First Answer": '#A6CFED',
-          	  "Unanswered Question Age":'#FF7F00'
-  		      },
- 		   },
+              "Question Age at Last Answer": '#B2DF8A',
+              "Question Age at First Answer": '#A6CFED',
+              "Unanswered Question Age":'#FF7F00'
+            },
+       },
 
- 	     axis: {
-  	     x: {
+       axis: {
+         x: {
             type: 'category' // this needed to load string x value
-       	 },
-       	 y: {
-       	 	label: "Count"
-       	 }
-  		  },
+         },
+         y: {
+          label: "Count"
+         }
+        },
 
-  	  tooltip: {
-  	  contents: tooltipFunction
-		}
+      tooltip: {
+      contents: tooltipFunction
+    }
 
 })
 })
@@ -206,7 +210,7 @@ function setupControls(){
 
       var row13 = viztable.append('tr').append('td').attr('align', 'left');
       row13.append('input').attr('name', 'attribute').attr('id', 'showPerc').attr('type', 'radio').attr('value', 'showPerc').attr('checked', 'checked');
-      row13.append('label').html('&nbsp; Show Probability of Question Getting Answer').style('font-size', '12px');
+      row13.append('label').html('&nbsp; Show Percentage of Questions Answered').style('font-size', '12px');
 
 
       var row14 = viztable.append('tr').append('td').attr('align', 'left');

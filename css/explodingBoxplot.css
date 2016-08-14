@@ -41,3 +41,9 @@ g.axis text{
   user-select: none;
   cursor: default;
 }
+#rcorners {
+    border-radius: 25px;
+	background: #eee;
+    padding: 15px;
+width: 250px;
+}
