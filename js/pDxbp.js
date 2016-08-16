@@ -86,7 +86,7 @@ function millisecondsToStr (milliseconds) {
        }
 
   function openWindowFunction(d) {
-  var win = window.open('http://stackoverflow.com/questions/'+d.Id, '_blank');
+	var win = window.open('http://stackoverflow.com/questions/'+d.Id, '_blank');
 if (win) {
     //Browser has allowed it to be opened
     win.focus();
@@ -204,6 +204,9 @@ $('#TagsSelect').multiselect({
       },
  onSelectAll: function() {
 $('#TagsSelect').multiselect("deselectAll",true)
+  var filtereddata = filterdata(data )
+            boxPlotFunctions.xbp.data(filtereddata);
+            boxPlotFunctions.xbp.update();
         }
 
     }
